@@ -11,7 +11,7 @@ resource appGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@20
   location: location
 }
 
-module certificate 'certificate.bicep' = {
+module certificate '../modules/certificate.bicep' = {
   name: 'certificate'
   scope: resourceGroup(apimRG)
   params: {
@@ -24,3 +24,5 @@ module certificate 'certificate.bicep' = {
     resourceId:                     appGatewayIdentity.id
   }
 }
+
+

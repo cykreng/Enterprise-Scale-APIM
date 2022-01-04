@@ -14,12 +14,11 @@ var apimFqdn =                      'api-internal.example.com'
 var keyVaultName =                  'kv-example-prod-centralus-001'
 var keyVaultRG =                    'rg-shared-example-prod-centralus-001'
 
-module appgwModule 'appgw.bicep' = {
+var certPassword =                  '123'
+
+module appgwModule '../appgw.bicep' = {
   name: 'appgwDeploy'
   scope: resourceGroup(apimRG)
-  dependsOn: [
-    apimModule
-  ]
   params: {
     appGatewayName:                 appgw
     appGatewayFQDN:                 appgwFqdn
@@ -28,5 +27,6 @@ module appgwModule 'appgw.bicep' = {
     primaryBackendEndFQDN:          apimFqdn
     keyVaultName:                   keyVaultName
     keyVaultResourceGroupName:      keyVaultRG
+    certPassword:                   certPassword
   }
 }

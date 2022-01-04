@@ -22,6 +22,8 @@ param probeUrl                      string = '/status-0123456789abcdef'
 param keyVaultName                  string
 param keyVaultResourceGroupName     string
 
+@secure()
+param certPassword                  string  
 
 var appGatewayPrimaryPip            = 'pip-${appGatewayName}'
 var appGatewayIdentityId            = 'identity-${appGatewayName}'
@@ -31,14 +33,17 @@ resource appGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@20
   location: location
 }
 
-module certificate 'certificate.bicep' = {
+module certificate './modules/certificate.bicep' = {
   name: 'certificate'
   scope: resourceGroup(keyVaultResourceGroupName)
   params: {
     objectId:           appGatewayIdentity.properties.principalId
     tenantId:           appGatewayIdentity.properties.tenantId
+    resourceId:         appGatewayIdentity.id
     keyVaultName:       keyVaultName
-    keyVaultSecretName: replace(appGatewayFQDN,'.', '-')
+    location:           location
+    appGatewayFQDN:     appGatewayFQDN
+    certPassword:       certPassword
   }
 }
 
@@ -58,7 +63,6 @@ resource appGatewayName_resource 'Microsoft.Network/applicationGateways@2019-09-
   name: appGatewayName
   location: location
   dependsOn: [
-    appGatewayPublicIPAddress
     certificate
     appGatewayIdentity
   ]

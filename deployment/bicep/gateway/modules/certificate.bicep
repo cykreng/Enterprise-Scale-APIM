@@ -8,7 +8,7 @@ param appGatewayFQDN          string
 param certPassword            string  
 
 var secretName = replace(appGatewayFQDN,'.', '')
-var certData   = loadFileAsBase64('./appgw.pfx')
+var certData   = loadFileAsBase64('../certs/appgw.pfx')
 
 resource accessPolicyGrant 'Microsoft.KeyVault/vaults/accessPolicies@2019-09-01' = {
   name: '${keyVaultName}/add'
@@ -31,7 +31,6 @@ resource accessPolicyGrant 'Microsoft.KeyVault/vaults/accessPolicies@2019-09-01'
   }
 }
 
-
 resource appGatewayCertificate 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: '${secretName}-certificate'
   dependsOn: [
@@ -52,12 +51,15 @@ resource appGatewayCertificate 'Microsoft.Resources/deploymentScripts@2020-10-01
   }
 }
 
-resource keyVaultCertificate 'Microsoft.KeyVault/vaults/secrets@2021-06-01-preview' existing = {
-  name: '${keyVaultName}/${secretName}'
+module appGatewaySecretsUri 'certificateSecret.bicep' = {
+  name: '${secretName}-certificate'
   dependsOn: [
     appGatewayCertificate
   ]
+  params: {
+    keyVaultName: keyVaultName
+    secretName: secretName
+  }
 }
 
-output secretUri string = keyVaultCertificate.properties.secretUriWithVersion
-
+output secretUri string = appGatewaySecretsUri.outputs.secretUri

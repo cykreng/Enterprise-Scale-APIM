@@ -34,13 +34,13 @@ param accountName string
 @secure()
 param personalAccessToken string
 
-
-
 @description('The FQDN for the Application Gateway. Example - api.example.com.')
 param appGatewayFqdn string
 
-@description('The pfx password file for the Application Gataeway TLS listener. (base64 encoded)')
-param appGatewayCertificateData     string
+@description('The passwrod for the TLS certificate')
+@secure()
+param certificatePassword string
+
 
 // Variables
 var location = deployment().location
@@ -110,24 +110,25 @@ module backend 'backend.bicep' = {
 var jumpboxSubnetId= networking.outputs.jumpBoxSubnetid
 var CICDAgentSubnetId = networking.outputs.CICDAgentSubnetId
 
-module shared './shared/shared.bicep' = {  dependsOn: [
-  networking
-]
-name: 'sharedresources'
-scope: resourceGroup(sharedRG.name)
-params: {
-  accountName: accountName
-  CICDAgentSubnetId: CICDAgentSubnetId
-  CICDAgentType: CICDAgentType
-  environment: environment
-  jumpboxSubnetId: jumpboxSubnetId
-  location: location
-  personalAccessToken: personalAccessToken
-  resourceGroupName: sharedRG.name
-  resourceSuffix: resourceSuffix
-  vmPassword: vmPassword
-  vmUsername: vmUsername
-}
+module shared './shared/shared.bicep' = {  
+  dependsOn: [
+    networking
+  ]
+  name: 'sharedresources'
+  scope: resourceGroup(sharedRG.name)
+  params: {
+    accountName: accountName
+    CICDAgentSubnetId: CICDAgentSubnetId
+    CICDAgentType: CICDAgentType
+    environment: environment
+    jumpboxSubnetId: jumpboxSubnetId
+    location: location
+    personalAccessToken: personalAccessToken
+    resourceGroupName: sharedRG.name
+    resourceSuffix: resourceSuffix
+    vmPassword: vmPassword
+    vmUsername: vmUsername
+  }
 }
 
 module apimModule 'apim/apim.bicep'  = {
@@ -168,8 +169,8 @@ module appgwModule 'gateway/appgw.bicep' = {
     location:                       location
     appGatewaySubnetId:             networking.outputs.appGatewaySubnetid
     primaryBackendEndFQDN:          '${apimName}.azure-api.net'
-    appGatewayCertificateData:      appGatewayCertificateData
     keyVaultName:                   shared.outputs.keyVaultName
     keyVaultResourceGroupName:      sharedRG.name
+    certPassword:                   certificatePassword
   }
 }
