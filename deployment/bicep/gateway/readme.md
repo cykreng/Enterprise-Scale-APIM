@@ -11,4 +11,5 @@ These steps are for deploying an Azure Application Gateway standalone, and not a
 ## Steps
 1. cd ./deployment/bicep/gateway/tests
 1. Update the appgw.test.bicep with your appropriate values
+1. Copy certificate to be used to ~/deployment/bicep/gateway/certs and rename it to appgw.pfx
 1. az deployment group create --name gw --resource-group rg-apim-example-prod-001 --template-file=appgw.test.bicep
