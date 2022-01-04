@@ -1,8 +1,6 @@
 param keyVaultName            string
+param managedIdentity         object      
 param location                string
-param objectId                string
-param tenantId                string
-param resourceId              string
 param appGatewayFQDN          string
 @secure()
 param certPassword            string  
@@ -15,8 +13,8 @@ resource accessPolicyGrant 'Microsoft.KeyVault/vaults/accessPolicies@2019-09-01'
   properties: {
     accessPolicies: [
       {
-        objectId: objectId
-        tenantId: tenantId
+        objectId: managedIdentity.properties.principalId
+        tenantId: managedIdentity.properties.principalId
         permissions: {
           secrets: [ 
             'get' 
@@ -46,7 +44,7 @@ resource appGatewayCertificate 'Microsoft.Resources/deploymentScripts@2020-10-01
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      '${resourceId}': {}
+      '${managedIdentity.id}': {}
     }
   }
 }

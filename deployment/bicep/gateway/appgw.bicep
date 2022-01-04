@@ -37,9 +37,7 @@ module certificate './modules/certificate.bicep' = {
   name: 'certificate'
   scope: resourceGroup(keyVaultResourceGroupName)
   params: {
-    objectId:           appGatewayIdentity.properties.principalId
-    tenantId:           appGatewayIdentity.properties.tenantId
-    resourceId:         appGatewayIdentity.id
+    managedIdentity:    appGatewayIdentity
     keyVaultName:       keyVaultName
     location:           location
     appGatewayFQDN:     appGatewayFQDN
@@ -64,12 +62,11 @@ resource appGatewayName_resource 'Microsoft.Network/applicationGateways@2019-09-
   location: location
   dependsOn: [
     certificate
-    appGatewayIdentity
   ]
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      '${resourceGroup().id}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${appGatewayIdentityId}': {}
+      '${appGatewayIdentity.id}': {}
     }
   }
   properties: {
