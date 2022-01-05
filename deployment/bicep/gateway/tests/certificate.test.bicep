@@ -1,8 +1,10 @@
+var workload =                      'example'
+var environment =                   'prod'
 var location =                      'southcentralus'
-var appgwFqdn =                     'api.bjdcsa.cloud'
-var apimRG =                        'DevSub01_BicepTest-RG'
-var keyVaultName =                  'kv-bjdcsacloud'
-var certPassword =                  'abc123'
+var appgwFqdn =                     'api.contoso.com'
+var apimRG =                        'ES-AppGateway_RG'
+var keyVaultName =                  'kv-${workload}-${environment}-002'
+var certPassword =                  '123456'
 
 var appGatewayIdentityId            = 'identity-bjdcsacloud'
 
@@ -19,9 +21,7 @@ module certificate '../modules/certificate.bicep' = {
     location:                       location
     keyVaultName:                   keyVaultName
     certPassword:                   certPassword
-    objectId:                       appGatewayIdentity.properties.principalId
-    tenantId:                       appGatewayIdentity.properties.tenantId
-    resourceId:                     appGatewayIdentity.id
+    managedIdentity:                appGatewayIdentity
   }
 }
 
