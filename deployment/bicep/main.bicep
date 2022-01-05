@@ -34,10 +34,10 @@ param accountName string
 @secure()
 param personalAccessToken string
 
-@description('The FQDN for the Application Gateway. Example - api.example.com.')
+@description('The FQDN for the Application Gateway. Example - api.contoso.com.')
 param appGatewayFqdn string
 
-@description('The passwrod for the TLS certificate')
+@description('The password for the TLS certificate for the Application Gateway.  The pfx file needs to be copied to deployment/bicep/gateway/certs/appgw.pfx')
 @secure()
 param certificatePassword string
 
