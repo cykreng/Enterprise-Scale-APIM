@@ -5,7 +5,7 @@ param appGatewayFQDN          string
 @secure()
 param certPassword            string  
 
-var secretName = replace(appGatewayFQDN,'.', '')
+var secretName = replace(appGatewayFQDN,'.', '-')
 var certData   = loadFileAsBase64('../certs/appgw.pfx')
 
 resource accessPolicyGrant 'Microsoft.KeyVault/vaults/accessPolicies@2019-09-01' = {
@@ -14,7 +14,7 @@ resource accessPolicyGrant 'Microsoft.KeyVault/vaults/accessPolicies@2019-09-01'
     accessPolicies: [
       {
         objectId: managedIdentity.properties.principalId
-        tenantId: managedIdentity.properties.principalId
+        tenantId: managedIdentity.properties.tenantId
         permissions: {
           secrets: [ 
             'get' 
@@ -44,7 +44,7 @@ resource appGatewayCertificate 'Microsoft.Resources/deploymentScripts@2020-10-01
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      '${managedIdentity.id}': {}
+      '/subscriptions/${managedIdentity.subscriptionId}/resourceGroups/${managedIdentity.resourceGroupName}/providers/${managedIdentity.resourceId}': {}
     }
   }
 }
