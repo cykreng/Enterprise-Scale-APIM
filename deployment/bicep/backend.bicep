@@ -56,7 +56,7 @@ var location = resourceGroup().location
 // Azure Storage Sizing
 //
 // - name: must be globally unique
-var storageAccounts_saapimcsbackend_name  = 'stbackend'
+var storageAccounts_saapimcsbackend_name  = uniqueString(resourceGroup().id)
 // - location
 var storageAccounts_location = location
 // - SKU name

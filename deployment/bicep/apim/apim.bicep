@@ -77,3 +77,5 @@ resource apimName_applicationinsights 'Microsoft.ApiManagement/service/diagnosti
     }
   }
 }
+
+output apimName string = apimName_resource.name

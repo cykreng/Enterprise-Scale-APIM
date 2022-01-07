@@ -17,6 +17,7 @@ param environment string
 param vmUsername string
 
 @description('The password for the Administrator user for all VMs created by this deployment')
+@secure()
 param vmPassword string
 
 @description('The CI/CD platform to be used, and for which an agent will be configured for the ASE deployment. Specify \'none\' if no agent needed')
@@ -151,7 +152,7 @@ module dnsZoneModule 'shared/dnszone.bicep'  = {
   params: {
     vnetName: networking.outputs.apimCSVNetName
     vnetRG: networkingRG.name
-    apimName: apimName
+    apimName: apimModule.outputs.apimName
     apimRG: apimRG.name
   }
 }

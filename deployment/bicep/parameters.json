@@ -22,6 +22,12 @@
         },
         "environment" :{ 
             "value": "dev"
+        },
+        "appGatewayFqdn" :{ 
+            "value": "api.contoso.com"
+        },
+        "certificatePassword" :{ 
+            "value": "123456"
         }
 
     }
