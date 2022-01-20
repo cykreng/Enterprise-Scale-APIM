@@ -46,7 +46,7 @@ param CICDAgentType string
 
 @description('The base URI where the CI/CD agent artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated.')
 param artifactsLocation string = 'https://raw.githubusercontent.com/cykreng/Enterprise-Scale-APIM/main/deployment/bicep/shared/agentsetup.ps1'
-//TODO - Make this a param
+//TODO - Make this a param.
 
 
 // Variables
