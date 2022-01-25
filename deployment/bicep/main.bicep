@@ -66,7 +66,7 @@ var sharedResourceGroupResources = {
   'environmentName': environment
   'resourceSuffix' : resourceSuffix
   'vmSuffix' : vmSuffix
-  'keyVaultName':'kv-${workloadName}-${environment}' // Must be between 3-24 alphanumeric characters 
+  'keyVaultName':'kv-${workloadName}-${environment}' // Must be between 3-24 alphanumeric characters
 }
 
 resource networkingRG 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -103,14 +103,14 @@ module backend 'backend.bicep' = {
   scope: resourceGroup(backendRG.name)
   params: {
     workloadName: workloadName
-    environment: environment    
+    environment: environment
   }
 }
 
 var jumpboxSubnetId= networking.outputs.jumpBoxSubnetid
 var CICDAgentSubnetId = networking.outputs.CICDAgentSubnetId
 
-module shared './shared/shared.bicep' = {  
+module shared './shared/shared.bicep' = {
   dependsOn: [
     networking
   ]
@@ -148,6 +148,9 @@ module apimModule 'apim/apim.bicep'  = {
 module dnsZoneModule 'shared/dnszone.bicep'  = {
   name: 'apimDnsZoneDeploy'
   scope: resourceGroup(sharedRG.name)
+  dependsOn: [
+    apimModule
+  ]
   params: {
     vnetName: networking.outputs.apimCSVNetName
     vnetRG: networkingRG.name
