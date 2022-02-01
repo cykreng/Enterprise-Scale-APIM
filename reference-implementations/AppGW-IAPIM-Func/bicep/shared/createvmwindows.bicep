@@ -45,9 +45,8 @@ param poolName string = 'Default'
 param CICDAgentType string
 
 @description('The base URI where the CI/CD agent artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated.')
-param artifactsLocation string = 'https://raw.githubusercontent.com/cykreng/Enterprise-Scale-Apim/main/deployment/bicep/shared/agentsetup.ps1'
 
-
+param artifactsLocation string = 'https://raw.githubusercontent.com/cykreng/Enterprise-Scale-Apim/main/reference-implementations/AppGW-IAPIM-Func/bicep/shared/agentsetup.ps1'
 // Variables
 var AgentName = 'agent-${vmName}'
 
@@ -115,6 +114,8 @@ resource vm_CustomScript 'Microsoft.Compute/virtualMachines/extensions@2021-04-0
       fileUris: [
         artifactsLocation
       ]   
+    }
+    protectedSettings: {
       commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -Command ./agentsetup.ps1 -url ${accountName} -pat ${personalAccessToken} -agent ${AgentName} -pool ${poolName} -agenttype ${CICDAgentType} '
     }
   }
