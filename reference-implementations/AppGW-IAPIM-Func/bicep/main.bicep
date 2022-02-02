@@ -12,7 +12,7 @@ param workloadName string
   'prod'
   'dr'
 ])
-param deplyomentEnvironment string
+param deploymentEnvironment string
 
 @description('The user name to be used as the Administrator for all VMs created by this deployment')
 param vmUsername string
@@ -47,7 +47,7 @@ param appGatewayCertType string
 
 // Variables
 var location = deployment().location
-var resourceSuffix = '${workloadName}-${deplyomentEnvironment}-${location}-001'
+var resourceSuffix = '${workloadName}-${deploymentEnvironment}-${location}-001'
 var networkingResourceGroupName = 'rg-networking-${resourceSuffix}'
 var sharedResourceGroupName = 'rg-shared-${resourceSuffix}'
 
@@ -86,7 +86,7 @@ module networking './networking/networking.bicep' = {
   scope: resourceGroup(networkingRG.name)
   params: {
     workloadName: workloadName
-    deploymentEnvironment: deplyomentEnvironment
+    deploymentEnvironment: deploymentEnvironment
   }
 }
 
@@ -96,7 +96,7 @@ module backend './backend/backend.bicep' = {
   params: {
     workloadName: workloadName
     backendSubnetId: networking.outputs.backEndSubnetid
-    deploymentEnvironment: deplyomentEnvironment
+    deploymentEnvironment: deploymentEnvironment
   }
 }
 
@@ -113,7 +113,7 @@ module shared './shared/shared.bicep' = {
     accountName: accountName
     CICDAgentSubnetId: CICDAgentSubnetId
     CICDAgentType: CICDAgentType
-    environment: environment
+    environment: deploymentEnvironment
     jumpboxSubnetId: jumpboxSubnetId
     location: location
     personalAccessToken: personalAccessToken
