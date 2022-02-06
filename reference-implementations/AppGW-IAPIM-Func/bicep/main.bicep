@@ -42,7 +42,7 @@ param appGatewayFqdn string
 @secure()
 param certificatePassword string
 
-@description('Set to selfsigned if self signed certificates should be used for the Application Gateway. Set to custom and copy the pfx file to deployment/bicep/gateway/certs/appgw.pfx if custom certificates are to be used')
+@description('Set to selfsigned if self signed certificates should be used for the Application Gateway. Set to custom and copy the pfx file to AppGW-IAPIM-Func/bicep/gateway/certs/appgw.pfx if custom certificates are to be used')
 param appGatewayCertType string
 
 // Variables
