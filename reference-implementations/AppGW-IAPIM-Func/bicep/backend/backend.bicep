@@ -43,7 +43,10 @@ param workloadName string
   'prod'
   'dr'
 ])
-param environment string
+param deploymentEnvironment string
+
+@description('Backend subnet id')
+param backendSubnetId string
 
 //
 // Variables
@@ -57,7 +60,7 @@ var location = resourceGroup().location
 // Azure Storage Sizing
 //
 // - name: must be globally unique
-var storageAccounts_saapimcsbackend_name  = toLower(take(replace('stbknd${workloadName}${environment}${location}', '-',''), 24))
+var storageAccounts_saapimcsbackend_name  = toLower(take(replace('stbknd${workloadName}${deploymentEnvironment}${location}', '-',''), 24))
 // - location
 var storageAccounts_location = location
 // - SKU name
@@ -76,7 +79,7 @@ var storageAccounts_minTLSVersion = 'TLS1_2'
 // Azure Application Service Plan
 //
 // - name
-var serverfarms_appsvcplanAPIMCSBackend_name  = 'plan-be-${workloadName}-${environment}-${location}'
+var serverfarms_appsvcplanAPIMCSBackend_name  = 'plan-be-${workloadName}-${deploymentEnvironment}-${location}'
 // - location
 var serverfarms_appsvcplanAPIMCSBackend_location  = location
 // Azure Application Service Plan sizing
@@ -96,27 +99,37 @@ var serverfarms_appsvcplanAPIMCSBackend_skuCapacity  = 1
 //
 // Azure Function App (Code Stack)
 // - name: must be globally unique
-var sites_funcappAPIMCSBackendMicroServiceA_name = 'func-code-be-${workloadName}-${environment}-${location}'
+var sites_funcappAPIMCSBackendMicroServiceA_name = 'func-code-be-${workloadName}-${deploymentEnvironment}-${location}'
 // - location
 var sites_funcappAPIMCSBackendMicroServiceA_location  = location
 // - site URL
-var sites_funcappAPIMCSBackendMicroServiceA_siteHostname   = 'func-code-be-${workloadName}-${environment}-${location}.azurewebsites.net'
+var sites_funcappAPIMCSBackendMicroServiceA_siteHostname   = 'func-code-be-${workloadName}-${deploymentEnvironment}-${location}.azurewebsites.net'
 // - repository URL
-var sites_funcappAPIMCSBackendMicroServiceA_repositoryHostname   = 'func-code-be-${workloadName}-${environment}-${location}.scm.azurewebsites.net'
+var sites_funcappAPIMCSBackendMicroServiceA_repositoryHostname   = 'func-code-be-${workloadName}-${deploymentEnvironment}-${location}.scm.azurewebsites.net'
 // - site name
-var sites_funcappAPIMCSBackendMicroServiceA_siteName   = 'funccodebe${workloadName}${environment}${location}'
+var sites_funcappAPIMCSBackendMicroServiceA_siteName   = 'funccodebe${workloadName}${deploymentEnvironment}${location}'
+// - private endpoint name
+var privateEndpoint_funcappAPIMCSBackendMicroServiceA_name   = 'pep-func-code-be-${workloadName}-${deploymentEnvironment}-${location}'
+// - private link service connection name
+var privateEndpoint_funcappAPIMCSBackendMicroServiceA_privateLink_serviceConnection_name   = 'plink-svcconn-func-code-be-${workloadName}-${deploymentEnvironment}-${location}'
 
-// Azure Function App name (Container)
+
+// Azure Function App (Container)
 // - name: must be globally unique
-var sites_funcappAPIMCSBackendMicroServiceB_name  = 'func-cont-be-${workloadName}-${environment}-${location}'
+var sites_funcappAPIMCSBackendMicroServiceB_name  = 'func-cont-be-${workloadName}-${deploymentEnvironment}-${location}'
 // - location
 var sites_funcappAPIMCSBackendMicroServiceB_location  = location
 // - site URL
-var sites_funcappAPIMCSBackendMicroServiceB_siteHostname  = 'func-cont-be-${workloadName}-${environment}-${location}.azurewebsites.net'
+var sites_funcappAPIMCSBackendMicroServiceB_siteHostname  = 'func-cont-be-${workloadName}-${deploymentEnvironment}-${location}.azurewebsites.net'
 // - repository URL
-var sites_funcappAPIMCSBackendMicroServiceB_repositoryHostname  = 'func-cont-be-${workloadName}-${environment}-${location}.scm.azurewebsites.net'
+var sites_funcappAPIMCSBackendMicroServiceB_repositoryHostname  = 'func-cont-be-${workloadName}-${deploymentEnvironment}-${location}.scm.azurewebsites.net'
 // - site name
-var sites_funcappAPIMCSBackendMicroServiceB_siteName  = 'funccontbe${workloadName}${environment}${location}'
+var sites_funcappAPIMCSBackendMicroServiceB_siteName  = 'funccontbe${workloadName}${deploymentEnvironment}${location}'
+// - private endpoint name
+var privateEndpoint_funcappAPIMCSBackendMicroServiceB_name   = 'pep-func-cont-be-${workloadName}-${deploymentEnvironment}-${location}'
+// - private link service connection name
+var privateEndpoint_funcappAPIMCSBackendMicroServiceB_privateLink_serviceConnection_name   = 'plink-svcconn-func-cont-be-${workloadName}-${deploymentEnvironment}-${location}'
+
 
 //
 // Definitions
@@ -533,4 +546,60 @@ resource sites_funcappAPIMCSBackendMicroServiceB_name_sites_funcappAPIMCSBackend
     siteName: sites_funcappAPIMCSBackendMicroServiceB_siteName // 'funcappAPIMCSBackendMicroServiceB'
     hostNameType: 'Verified'
   }
+}
+
+// Private endpoint for Azure Function App (Linux, .NET Core 3.1)
+resource privateEndpoint_funcappAPIMCSBackendMicroServiceA 'Microsoft.Network/privateEndpoints@2021-03-01' = {
+  name: privateEndpoint_funcappAPIMCSBackendMicroServiceA_name
+  location: location
+  properties: {    
+    privateLinkServiceConnections: [    
+      {
+        name: privateEndpoint_funcappAPIMCSBackendMicroServiceA_privateLink_serviceConnection_name
+        properties: {
+          groupIds: [ 
+            'sites' 
+          ]
+          privateLinkServiceConnectionState: {
+            actionsRequired: 'None'
+            status: 'Approved'
+          }
+          privateLinkServiceId: sites_funcappAPIMCSBackendMicroServiceA_name_resource.id
+        }
+      }      
+    ]
+    manualPrivateLinkServiceConnections: []
+    subnet: {
+      id: backendSubnetId
+    }
+    customDnsConfigs: []
+    }
+}
+
+// Private endpoint for Azure Function App (container)
+resource privateEndpoint_funcappAPIMCSBackendMicroServiceB 'Microsoft.Network/privateEndpoints@2021-03-01' = {
+  name: privateEndpoint_funcappAPIMCSBackendMicroServiceB_name
+  location: location
+  properties: {    
+    privateLinkServiceConnections: [    
+      {
+        name: privateEndpoint_funcappAPIMCSBackendMicroServiceB_privateLink_serviceConnection_name
+        properties: {
+          groupIds: [ 
+            'sites' 
+          ]
+          privateLinkServiceConnectionState: {
+            actionsRequired: 'None'
+            status: 'Approved'
+          }
+          privateLinkServiceId: sites_funcappAPIMCSBackendMicroServiceB_name_resource.id
+        }
+      }      
+    ]
+    manualPrivateLinkServiceConnections: []
+    subnet: {
+      id: backendSubnetId
+    }
+    customDnsConfigs: []
+    }
 }
